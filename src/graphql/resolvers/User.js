@@ -22,13 +22,14 @@ export default {
             const newUser = new User({username, email, password});
             return new Promise((resolve, reject) => {
                 newUser.save((error, response) => {
+                    console.log(response);
                     error ? reject(error) : resolve(response);
                 });
             });
         },
         deleteUser: (root, {_id}) => {
             return new Promise((resolve, reject) => {
-                User.findOneAndRemove({_id}).exec((error, response) => {
+                User.findByIdAndRemove({_id}).exec((error, response) => {
                     error ? reject(error) : resolve(response);
                 });
             });

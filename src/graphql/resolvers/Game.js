@@ -28,7 +28,7 @@ export default {
         },
         deleteGame: (root, {_id}) => {
             return new Promise((resolve, reject) => {
-                Game.findOneAndRemove({_id}).exec((error, response) => {
+                Game.findByIdAndRemove({_id}).exec((error, response) => {
                     error ? reject(error) : resolve(response);
                 });
             });
