@@ -1,41 +1,41 @@
-import User from "../../models/User";
+import Game from "../../models/Game";
 
 export default {
     Query: {
-        user: (root, args) => {
+        game: (root, args) => {
             return new Promise((resolve, reject) => {
-                User.findOne(args).exec((error, response) => {
+                Game.findOne(args).exec((error, response) => {
                     error ? reject(error) : resolve(response);
                 });
             });
         },
-        users: () => {
+        games: () => {
             return new Promise((resolve, reject) => {
-                User.find({}).populate().exec((error, response) => {
+                Game.find({}).populate().exec((error, response) => {
                     error ? reject(error) : resolve(response);
                 });
             });
         }
     },
     Mutation: {
-        addUser: (root, {username, email, password}) => {
-            const newUser = new User({username, email, password});
+        addGame: (root, {name, description, imageUrl, price}) => {
+            const newGame = new Game({name, description, imageUrl, price});
             return new Promise((resolve, reject) => {
-                newUser.save((error, response) => {
+                newGame.save((error, response) => {
                     error ? reject(error) : resolve(response);
                 });
             });
         },
-        deleteUser: (root, {_id}) => {
+        deleteGame: (root, {_id}) => {
             return new Promise((resolve, reject) => {
-                User.findOneAndRemove({_id}).exec((error, response) => {
+                Game.findOneAndRemove({_id}).exec((error, response) => {
                     error ? reject(error) : resolve(response);
                 });
             });
         },
-        editUser: (root, {_id, username, email, password}) => {
+        editGame: (root, {_id, name, description, imageUrl, price}) => {
             return new Promise((resolve, reject) => {
-                User.findByIdAndUpdate({_id}, {$set: {username, email, password}}, {new: true}).exec((error, response) => {
+                Game.findByIdAndUpdate({_id}, {$set: {name, description, imageUrl, price}}, {new: true}).exec((error, response) => {
                     error ? reject(error) : resolve(response);
                 });
             });
