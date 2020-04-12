@@ -23,7 +23,7 @@ app.use(
     bodyParser.json(),
     expressGraphQL({
         schema: schema,
-        graphiql: true
+        graphiql: true // позволява графичния интерфейс
     })
 )
 
