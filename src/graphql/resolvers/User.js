@@ -34,12 +34,20 @@ export default {
                 });
             });
         },
-        editUser: (root, {_id, username, email, password}) => {
-            return new Promise((resolve, reject) => {
-                User.findByIdAndUpdate({_id}, {$set: {username, email, password}}, {new: true}).exec((error, response) => {
-                    error ? reject(error) : resolve(response);
-                });
-            });
+        editUser: async (root, {_id, username, email, password}) => {
+            // вариант с асинхронни функции (в този случай трябва и горната функция да е async)
+            const response = await User.findByIdAndUpdate({_id}, {username, email, password}, {new: true}).exec();
+            if(!response) {
+                throw new Error(`Connot save user: ${_id}`);
+            }
+            return response;
+
+            // вариант с promises
+            // return new Promise((resolve, reject) => {
+            //     User.findByIdAndUpdate({_id}, {$set: {username, email, password}}, {new: true}).exec((error, response) => {
+            //         error ? reject(error) : resolve(response);
+            //     });
+            // });
         }
     }
 }
