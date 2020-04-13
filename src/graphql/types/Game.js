@@ -1,4 +1,12 @@
 export default `
+    input GameInput {
+        _id: String!
+        name: String!
+        description: String!
+        imageUrl: String!
+        price: Float!
+    }
+
     type Game {
         _id: String!
         name: String!

@@ -34,9 +34,9 @@ export default {
                 });
             });
         },
-        editUser: async (root, {_id, username, email, password}) => {
+        editUser: async (root, {_id, username, email, password, games}) => {
             // вариант с асинхронни функции (в този случай трябва и горната функция да е async)
-            const response = await User.findByIdAndUpdate({_id}, {username, email, password}, {new: true}).exec();
+            const response = await User.findByIdAndUpdate({_id}, {username, email, password, games}, {new: true}).exec();
             if(!response) {
                 throw new Error(`Connot save user: ${_id}`);
             }

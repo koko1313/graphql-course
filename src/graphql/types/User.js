@@ -4,6 +4,7 @@ export default `
         username: String!
         email: String!
         password: String!
+        games: [Game]
     }
 
     type Query {
@@ -14,6 +15,6 @@ export default `
     type Mutation {
         addUser(username: String!, email: String!, password: String!): User
         deleteUser(_id: String!): User
-        editUser(_id: String!, username: String, email: String, password: String): User
+        editUser(_id: String!, username: String, email: String, password: String, games: [GameInput]): User
     }
 `;
