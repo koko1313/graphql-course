@@ -9,6 +9,7 @@ export default {
                 });
             });
         },
+
         users: () => {
             return new Promise((resolve, reject) => {
                 User.find({}).populate().exec((error, response) => {
@@ -17,6 +18,7 @@ export default {
             });
         }
     },
+
     Mutation: {
         addUser: (root, {username, email, password}) => {
             const newUser = new User({username, email, password});
@@ -27,6 +29,7 @@ export default {
                 });
             });
         },
+
         deleteUser: (root, {_id}) => {
             return new Promise((resolve, reject) => {
                 User.findByIdAndRemove({_id}).exec((error, response) => {
@@ -34,9 +37,17 @@ export default {
                 });
             });
         },
+
         editUser: async (root, {_id, username, email, password, games}) => {
+            const data = {};
+
+            if(username) data.username = username;
+            if(email) data.email = email;
+            if(password) data.password = password;
+            if(games) data.games = games;
+
             // вариант с асинхронни функции (в този случай трябва и горната функция да е async)
-            const response = await User.findByIdAndUpdate({_id}, {username, email, password, games}, {new: true}).exec();
+            const response = await User.findByIdAndUpdate({_id}, data, {new: true}).exec();
             if(!response) {
                 throw new Error(`Connot save user: ${_id}`);
             }
