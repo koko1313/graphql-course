@@ -145,14 +145,16 @@ export default {
         },
 
         // Последния параметър {user} съдържа текущия user
-        editUser: async (root, args, {user}) => {
+        editUser: async (root, {_id, firstName, lastName, password}, {user} ) => {
             if(!user) {
                 throw new Error("User is not authenticated");
             }
 
-            const { _id, ...set } = args; // константа set, която е args без _id
-
-            const response = await User.findByIdAndUpdate({_id: args._id}, {$set: set}, {new: true}).exec();
+            const response = await User.findByIdAndUpdate({_id}, {$set: {
+                firstName, 
+                lastName, 
+                password, 
+            }}, {new: true}).exec();
             
             if(!response) {
                 throw new Error(`Connot save user: ${_id}`);

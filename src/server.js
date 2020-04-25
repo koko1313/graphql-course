@@ -4,11 +4,13 @@ import mongoose from "mongoose";
 import bodyParser from "body-parser";
 import cors from "cors";
 import schema from "./graphql/GraphQLSchema";
+import ValidationError from "./graphql/ValidationError";
 
 import dotenv from "dotenv";
 dotenv.config();
 
 import jwt from "express-jwt";
+
 const auth = jwt({
     secret: process.env.JWT_SECRET,
     credentialsRequired: false,
@@ -43,12 +45,18 @@ app.use(
                 user: req.user
             },
             graphiql: true, // позволява графичния интерфейс
-            formatError: error => ({
-                message: error.message,
-                validationErrors: error.originalError && error.originalError.validationErrors,
-                locations: error.locations,
-                path: error.path,
-            }),
+            formatError: error => {
+                if (error.originalError instanceof ValidationError) {
+                    return {
+                        message: error.mesage,
+                        validationErrors: error.originalError && error.originalError.validationErrors,
+                        // locations: error.locations,
+                        // path: error.path
+                    }
+                }
+                
+                return error;
+            },
         }
     })
 )
