@@ -8,12 +8,26 @@ import schema from "./graphql/GraphQLSchema";
 import dotenv from "dotenv";
 dotenv.config();
 
+import jwt from "express-jwt";
+const auth = jwt({
+    secret: process.env.JWT_SECRET,
+    credentialsRequired: false,
+});
+
 const app = express();
 
 const PORT = process.env.PORT || "3000";
 const db = process.env.MONGODB_URL;
 
-mongoose.connect(db, {useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false}).then(()=>{
+const oprions = {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useFindAndModify: false,
+    autoIndex: true,
+    useCreateIndex: true,
+};
+
+mongoose.connect(db, oprions).then(()=>{
     console.log("Connected to MongoDB");
 }).catch(error => console.log(error));
 
@@ -21,9 +35,21 @@ app.use(
     "/graphql",
     cors(),
     bodyParser.json(),
-    expressGraphQL({
-        schema: schema,
-        graphiql: true // позволява графичния интерфейс
+    auth,
+    expressGraphQL(req => {
+        return {
+            schema: schema,
+            context: {
+                user: req.user
+            },
+            graphiql: true, // позволява графичния интерфейс
+            formatError: error => ({
+                message: error.message,
+                validationErrors: error.originalError && error.originalError.validationErrors,
+                locations: error.locations,
+                path: error.path,
+            }),
+        }
     })
 )
 

@@ -68,7 +68,8 @@
     "merge-graphql-schemas": "^1.5.7",
     "mongoose": "^5.3.13",
     "nodemon": "^1.18.10",
-    "uuid": "^3.3.2"
+    "uuid": "^3.3.2",
+    "validator": "^13.0.0"
   },
   "engines": {
     "node": "10.3.0"

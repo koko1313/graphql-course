@@ -1,6 +1,14 @@
 import User from "../../models/User";
+
+// bcrypt is used to crypt passwords
 import bcrypt from "bcrypt";
-import jsonwebtoken, { JsonWebTokenError } from "jsonwebtoken";
+
+// jsonwebtoken is used for authentication
+import jsonwebtoken from "jsonwebtoken";
+
+// validator is used for validationg fields and handling custom errors with ValicationError
+import validator from "validator";
+import ValidationError from "../ValidationError";
 
 import dotenv from "dotenv";
 dotenv.config();
@@ -21,11 +29,56 @@ export default {
                     error ? reject(error) : resolve(response);
                 });
             });
-        }
+        },
+
+        currentUser: async(root, args, {user}) => {
+            if(!user) {
+                throw new ValidationError([{
+                    key: "user",
+                    message: "not_authenticated",
+                }]);
+            }
+
+            return await User.findById(user._id);
+        },
     },
 
     Mutation: {
         addUser: async (root, {firstName, lastName, email, userType, password}) => {
+            let errors = [];
+
+            if(validator.isEmpty(firstName)) {
+                errors.push({
+                    key: "firstName",
+                    message: "is_empty",
+                });
+            }
+
+            if(validator.isEmpty(lastName)) {
+                errors.push({
+                    key: "lastName",
+                    message: "is_empty",
+                });
+            }
+
+            if(!validator.isEmail(email)) {
+                errors.push({
+                    key: "email",
+                    message: "not_valid",
+                });
+            }
+
+            if(!validator.isLength(password, {min: 6, max: 20})) {
+                errors.push({
+                    key: "password",
+                    message: "password_length",
+                });
+            }
+
+            if(errors.length) {
+                throw new ValidationError(errors);
+            }
+            
             const newUser = await new User({
                 firstName,
                 lastName,
@@ -46,12 +99,12 @@ export default {
                 console.log("something went wrong");
             }
 
-            return JsonWebTokenError.toString(
+            return jsonwebtoken.sign(
                 {
                     _id: newUser._id,
                     email: newUser.email,
                 }, 
-                prosess.env.JWT_SECRET, 
+                process.env.JWT_SECRET, 
                 {
                     expiresIn: '1d',
                 }
@@ -71,12 +124,12 @@ export default {
                 throw new Error(`Cannot match password for email: ${email}`);
             }
 
-            return JsonWebTokenError.toString(
+            return jsonwebtoken.sign(
                 {
                     _id: user._id,
                     email: user.email,
                 }, 
-                prosess.env.JWT_SECRET, 
+                process.env.JWT_SECRET, 
                 {
                     expiresIn: '1d',
                 }
@@ -91,27 +144,21 @@ export default {
             });
         },
 
-        editUser: async (root, {_id, username, email, password, games}) => {
-            const data = {};
+        // Последния параметър {user} съдържа текущия user
+        editUser: async (root, args, {user}) => {
+            if(!user) {
+                throw new Error("User is not authenticated");
+            }
 
-            if(username) data.username = username;
-            if(email) data.email = email;
-            if(password) data.password = password;
-            if(games) data.games = games;
+            const { _id, ...set } = args; // константа set, която е args без _id
 
-            // вариант с асинхронни функции (в този случай трябва и горната функция да е async)
-            const response = await User.findByIdAndUpdate({_id}, data, {new: true}).exec();
+            const response = await User.findByIdAndUpdate({_id: args._id}, {$set: set}, {new: true}).exec();
+            
             if(!response) {
                 throw new Error(`Connot save user: ${_id}`);
             }
-            return response;
 
-            // вариант с promises
-            // return new Promise((resolve, reject) => {
-            //     User.findByIdAndUpdate({_id}, {$set: {username, email, password}}, {new: true}).exec((error, response) => {
-            //         error ? reject(error) : resolve(response);
-            //     });
-            // });
+            return response;
         }
     }
 }
